@@ -10,7 +10,7 @@ const ProtectedRoutes = require("../api/protected");
 const verifyToken = require("../api/verifyToken");
 
 // Use the imported handlers as middleware
-router.use("/auth", auth-Routes); // Example route for auth
+router.use("/auth", authRoutes); // Example route for auth
 router.use("/contacts", contactRoutes); // Assuming you want to protect this route
 router.use("/protected", verifyToken, ProtectedRoutes); // Protecting the protected routes
 
