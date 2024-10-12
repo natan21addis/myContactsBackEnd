@@ -1,2 +1,2 @@
-# myContactsBackEnd
-contact handling site like google contact
+# BackEndMyContacts
+handling contacts like the phone book
