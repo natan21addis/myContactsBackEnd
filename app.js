@@ -8,7 +8,19 @@ const app = express();
 const PORT = process.env.PORT || 4000; // Use process.env.PORT for dynamic port binding
 
 // Connect to MongoDB
-connectDB();
+connectDB()
+  .then(() => {
+    console.log("Connected to MongoDB successfully");
+    
+    // Start the server only after successful connection
+    app.listen(PORT, () => {
+      console.log(`Server started at http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error);
+    process.exit(1); // Exit the process if the connection fails
+  });
 
 app.use(express.static("public"));
 app.use(express.static("uploads"));
@@ -30,7 +42,3 @@ app.use((req, res, next) => {
 });
 
 app.use("/", require("./routes/route"));
-
-app.listen(PORT, () => {
-  console.log(`Server started at http://localhost:${PORT}`);
-});

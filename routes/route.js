@@ -6,13 +6,12 @@ const multer = require("multer");
 const fs = require("fs");
 const authRoutes = require("../api/auth");
 const contactRoutes = require("../api/contacts");
-const ProtectedRoutes = require("../api/protected");
-const verifyToken = require("../api/verifyToken");
+
 
 // Use the imported handlers as middleware
 router.use("/auth", authRoutes); // Example route for auth
 router.use("/contacts", contactRoutes); // Assuming you want to protect this route
-router.use("/protected", verifyToken, ProtectedRoutes); // Protecting the protected routes
+
 
 
 // // Multer configuration for file upload
