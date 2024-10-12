@@ -1,11 +1,11 @@
 const connectToDatabase = require("../db");
-const User = require("../models/users");
+const User = require("../models/user"); // Ensure correct import
 
 module.exports = async function handler(req, res) {
-  await connectToDatabase(); // Ensure database connection
+  await connectToDatabase();
 
   if (req.method === "POST") {
-    const { action } = req.body; // Action can be "sign-up" or "login"
+    const { action } = req.body;
 
     try {
       if (action === "sign-up") {
@@ -19,14 +19,16 @@ module.exports = async function handler(req, res) {
         if (!user || !(await user.isValidPassword(password))) {
           return res.status(401).json({ message: "Invalid credentials" });
         }
-
-        // Instead of a token, you can return user information or a success message
-        return res.status(200).json({ message: "Login successful", user: { id: user._id, email: user.email } });
+        return res
+          .status(200)
+          .json({
+            message: "Login successful",
+            user: { id: user._id, email: user.email },
+          });
       }
     } catch (err) {
       return res.status(500).json({ message: "Server error: " + err.message });
     }
   }
-
   return res.status(405).json({ message: "Method not allowed" });
 };
