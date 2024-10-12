@@ -1,11 +1,16 @@
-// backend/models/user.js
+// backend/models/users.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const connectDB = require("../db");
+
+connectDB().catch((error) => {
+  console.error("Database connection error in model:", error);
+});
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: false,
     },
     isAdmin: {
         type: Boolean,
@@ -14,15 +19,16 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
+        required: true, // Typically, email should be required
+        unique: true,
     },
     password: {
         type: String,
-        required: true,
+        required: true // Password should be required
     },
     phone: {
         type: String,
-        required: true,
+        required: false,
     },
     image: {
         type: String,
@@ -30,17 +36,21 @@ const userSchema = new mongoose.Schema({
     },
     created: {
         type: Date,
-        required: true,
         default: Date.now,
     }
 });
 
-userSchema.methods.isValidPassword = async function (password) {
-    try {
-        return await bcrypt.compare(password, this.password);
-    } catch (error) {
-        throw new Error(error);
+// Hash the password before saving the user
+userSchema.pre('save', async function(next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, 10);
     }
+    next();
+});
+
+// Method to validate password
+userSchema.methods.isValidPassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

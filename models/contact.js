@@ -1,32 +1,44 @@
-// backend/models/contact.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
+// Define the contact schema
 const contactSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference to the User model
-    required: false,
-  },
   name: {
     type: String,
     required: true,
   },
-  phone: {
-    type: String,
-    required: false,
-  },
   email: {
     type: String,
-    required: false,
+    required: true,
+    unique: true,
+    match: /.+\@.+\..+/,
+  },
+  phone: {
+    type: String,
+    required: true,
   },
   password: {
     type: String,
     required: true,
   },
-  image: {
-    type: String,
-    required: false,
-  },
+}, {
+  timestamps: true,
 });
 
-module.exports = mongoose.model("Contact", contactSchema);
+// Hash password before saving
+contactSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+// Method to validate password
+contactSchema.methods.isValidPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+// Create the Contact model
+const Contact = mongoose.model('Contact', contactSchema);
+
+module.exports = Contact;
