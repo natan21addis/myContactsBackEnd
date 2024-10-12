@@ -9,8 +9,8 @@ const contactRoutes = require("../api/contacts");
 
 
 // Use the imported handlers as middleware
-router.use("/auth", authRoutes); // Example route for auth
-router.use("/contacts", contactRoutes); // Assuming you want to protect this route
+router.use("/api/auth", authRoutes); // Example route for auth
+router.use("/api/contacts", contactRoutes); // Assuming you want to protect this route
 
 
 
