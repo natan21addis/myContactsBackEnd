@@ -7,6 +7,15 @@ const connectDB = require("./db");
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// CORS configuration to allow requests from any origin
+const corsOptions = {
+  origin: '*', // Allow all origins
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allow specific methods
+  credentials: true, // Allow credentials (e.g., cookies)
+};
+
+app.use(cors(corsOptions)); // Use CORS middleware with options
+
 connectDB()
   .then(() => {
     console.log("Connected to MongoDB successfully");
@@ -28,7 +37,7 @@ app.use(express.static("public"));
 app.use(express.static("uploads"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(cors());
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
