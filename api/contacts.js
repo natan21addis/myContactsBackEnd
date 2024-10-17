@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
     } catch (err) {
       return handleError(err);
     }
-  
+
   // Get Contacts with pagination, search, and filtering
   } else if (req.method === "GET") {
     const { page = 1, limit = 10, search } = req.query;
@@ -49,7 +49,7 @@ module.exports = async function handler(req, res) {
     } catch (err) {
       return handleError(err);
     }
-  
+
   // Delete Contact
   } else if (req.method === "DELETE") {
     const { id } = req.query;
@@ -66,12 +66,12 @@ module.exports = async function handler(req, res) {
 
   // Edit Contact
   } else if (req.method === "PUT") {
-    const { id } = req.query;
+    const { id } = req.params; // Get the ID from the URL parameters
     const { name, email, phone } = req.body;
 
     try {
       const updatedContact = await Contact.findByIdAndUpdate(
-        id,
+        id, // Use the id from req.params
         { name, email, phone },
         { new: true } // Return the updated document
       );
