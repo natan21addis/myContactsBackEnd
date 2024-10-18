@@ -1,5 +1,6 @@
 const connectToDatabase = require("../db");
-const User = require("../models/contact"); // Ensure this points to the correct model
+const User = require("../models/users"); // Ensure this points to the correct model
+const jwt = require('jsonwebtoken');
 
 module.exports = async function handler(req, res) {
     await connectToDatabase();
@@ -27,9 +28,15 @@ module.exports = async function handler(req, res) {
                     return res.status(401).json({ message: "Invalid credentials" });
                 }
 
+                // Generate JWT token
+                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+                    expiresIn: '1h', // Set the token expiration time
+                });
+
                 return res.status(200).json({
                     message: "Login successful",
-                    user: { id: user._id, email: user.email },
+                    user: { id: user._id, email: user.email, role: user.role },
+                    token // Send the token to the client
                 });
             }
         } catch (err) {
