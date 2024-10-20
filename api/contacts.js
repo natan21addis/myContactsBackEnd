@@ -19,20 +19,22 @@ const authenticate = (req, res, next) => {
   });
 };
 
-module.exports = async function handler(req, res) {
+// Main handler function for contact management
+module.exports = async function contactHandler(req, res) {
   await connectToDatabase(); // Ensure database connection
 
   // Apply authentication middleware
   authenticate(req, res, async () => {
-    // Helper function to handle errors
     const handleError = (err) => {
+      console.error("Error:", err); // Log the error for debugging
       return res.status(500).json({ message: err.message });
     };
+
+    const userId = req.userId; // Extract userId from authentication middleware
 
     // Add Contact
     if (req.method === "POST") {
       const { name, email, phone } = req.body;
-      const userId = req.userId; // Extract userId from authentication middleware
 
       try {
         const newContact = new Contact({ name, email, phone, userId }); // Include userId
@@ -42,9 +44,8 @@ module.exports = async function handler(req, res) {
         return handleError(err);
       }
 
-    // Get Contacts for Logged-in User
+    // Fetch Contacts for Logged-in User
     } else if (req.method === "GET") {
-      const userId = req.userId; // Extract userId from authentication middleware
       const { page = 1, limit = 10, search } = req.query;
 
       const query = { userId }; // Ensure only the logged-in user's contacts are fetched
@@ -71,12 +72,26 @@ module.exports = async function handler(req, res) {
         return handleError(err);
       }
 
-    // Delete Contact
-    } else if (req.method === "DELETE") {
-      const { id } = req.query;
+    // Fetch specific Contact by ID
+    } else if (req.method === "GET" && req.params.id) {
+      const { id } = req.params;
 
       try {
-        const deletedContact = await Contact.findOneAndDelete({ _id: id, userId: req.userId });
+        const contact = await Contact.findOne({ _id: id, userId });
+        if (!contact) {
+          return res.status(404).json({ message: "Contact not found or unauthorized" });
+        }
+        return res.json(contact);
+      } catch (err) {
+        return handleError(err);
+      }
+
+    // Delete Contact
+    } else if (req.method === "DELETE") {
+      const { id } = req.params;
+
+      try {
+        const deletedContact = await Contact.findOneAndDelete({ _id: id, userId });
         if (!deletedContact) {
           return res.status(404).json({ message: "Contact not found or unauthorized" });
         }
@@ -87,15 +102,19 @@ module.exports = async function handler(req, res) {
 
     // Edit Contact
     } else if (req.method === "PUT") {
-      const { id } = req.query;
+      const { id } = req.params; // Get the contact ID from the path parameters
       const { name, email, phone } = req.body;
+
+      // Log the incoming request details for debugging
+      console.log('Updating contact ID:', id, 'for user ID:', userId, 'with data:', { name, email, phone });
 
       try {
         const updatedContact = await Contact.findOneAndUpdate(
-          { _id: id, userId: req.userId }, // Ensure user owns the contact
+          { _id: id, userId }, // Ensure user owns the contact
           { name, email, phone },
-          { new: true } // Return the updated document
+          { new: true, runValidators: true } // Return the updated document and validate
         );
+
         if (!updatedContact) {
           return res.status(404).json({ message: "Contact not found or unauthorized" });
         }
